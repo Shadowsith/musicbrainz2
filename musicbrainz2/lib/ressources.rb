@@ -30,15 +30,34 @@ module MusicBrainz2
     end
   end
 
-  class Annotation
+  class Annotation < Ressource
     include Request
 
     public
+
+    attr_accessor :s_type, :s_entity, :s_name, :s_text
+    attr_reader :type, :entity, :name, :text
 
     def self.search(data, linker = "AND")
       res = Request.get("annotation", data, linker)
       @results = res["annotations"]
       return @results
+    end
+
+    def search()
+      params = {}
+      params[:type] = @s_type if !@s_type.nil?
+      params[:entity] = @s_entity if !@s_entity.nil?
+      params[:name] = @s_name if !@s_name.nil?
+      params[:text] = @s_text if !@s_text.nil?
+      return Request.get("annotation", params)["annotations"]
+    end
+
+    def parse(hash)
+      @type = hash["type"]
+      @entity = hash["entity"]
+      @name = hash["name"]
+      @text = hash["text"]
     end
   end
 
@@ -47,11 +66,33 @@ module MusicBrainz2
 
     public
 
-    attr_accessor :id, :name, :sort_name, :iso_codes
+    attr_accessor :s_aid, :s_alias, :s_area, :s_begin, :s_comment, :s_end
+    attr_accessor :s_ended, :s_iso, :s_iso1, :s_iso2, :s_iso3, :sortname
+    attr_accessor :s_type
+    attr_reader :id, :name, :sort_name, :iso_codes
+    attr_reader :life_span, :aliases
+
     def self.search(data, linker = "AND")
       res = Request.get("area", data, linker)
       @results = res["areas"]
       return @results
+    end
+
+    def search()
+      params = {}
+      params[:aid] = @s_aid if !@s_aid.nil?
+      params[:area] = @s_area if !@s_area.nil?
+      params[:begin] = @s_begin if !@s_begin.nil?
+      params[:comment] = @s_comment if !@s_comment.nil?
+      params[:end] = @s_end if !@s_end.nil?
+      params[:ended] = @s_ended if !@s_ended.nil?
+      params[:iso] = @s_iso if !@s_iso.nil?
+      params[:iso1] = @s_iso1 if !@s_iso1.nil?
+      params[:iso2] = @s_iso2 if !@s_iso2.nil?
+      params[:iso3] = @s_iso3 if !@s_iso3.nil?
+      params[:sortname] = @s_sortname if !@s_sortname.nil?
+      params[:type] = @s_type if !@s_type.nil?
+      return Request.get("area", params)["areas"]
     end
 
     def parse(hash)
@@ -64,6 +105,15 @@ module MusicBrainz2
           @iso_codes.push(h)
         end
       end
+      if !hash["life-span"].nil?
+        @life_span = LifeSpan.new(hash["life-span"])
+      end
+      @aliases = []
+      if !hash["aliases"].nil?
+        hash["aliases"].each do |h|
+          @aliases.push(Alias.new(h))
+        end
+      end
     end
   end
 
@@ -72,7 +122,13 @@ module MusicBrainz2
 
     public
 
-    attr_accessor :id, :name, :sort_name, :aliases, :tags, :area, :begin_area
+    attr_accessor :s_alias, :s_area, :s_arid, :s_artist, :s_artistaccent
+    attr_accessor :s_begin, :s_beginarea, :s_comment, :s_end, :s_endarea
+    attr_accessor :s_ended, :s_gender, :s_ipi, :s_sortname, :s_tag, :s_type
+    attr_accessor :s_country
+
+    attr_reader :id, :name, :sort_name, :aliases, :tags, :area, :begin_area
+    attr_reader :type, :type_id, :life_span
 
     def self.search(data, linker = "AND")
       res = Request.get("artist", data, linker)
@@ -82,18 +138,32 @@ module MusicBrainz2
 
     def search()
       params = {}
-      if !@name.nil?
-        params[:name] = @name
-      end
-      res = Request.get("artist", params)
-      @results = res["artists"]
-      return @results
+      params[:alias] = @s_alias if !@s_alias.nil?
+      params[:area] = @s_area if !@s_area.nil?
+      params[:arid] = @s_arid if !@s_arid.nil?
+      params[:artist] = @s_artist if !@s_artist.nil?
+      params[:artistaccent] = @s_artistaccent if !@s_artistaccent.nil?
+      params[:begin] = @s_begin if !@s_begin.nil?
+      params[:beginarea] = @s_beginarea if !@s_beginarea.nil?
+      params[:comment] = @s_comment if !@s_comment.nil?
+      params[:country] = @s_country if !@s_country.nil?
+      params[:end] = @s_end if !@s_end.nil?
+      params[:endarea] = @s_endarea if !@s_endarea.nil?
+      params[:ended] = @s_ended if !@s_ended.nil?
+      params[:gender] = @s_gender if !@s_gender.nil?
+      params[:ipi] = @s_ipi if !@s_ipi.nil?
+      params[:sortname] if !@s_sortname.nil?
+      params[:tag] = @s_tag if !@s_tag.nil?
+      params[:type] = @s_type if !@s_type.nil?
+      return Request.get("artist", params)["artists"]
     end
 
     def parse(hash)
       @id = hash["id"]
       @name = hash["name"]
       @sort_name = hash["sort-name"]
+      @type = hash["type"]
+      @type_id = hash["type-id"]
       if !hash["aliases"].nil?
         @aliases = []
         hash["aliases"].each do |h|
@@ -106,6 +176,15 @@ module MusicBrainz2
       if !hash["begin-area"].nil?
         @begin_area = Area.new(hash["begin-area"])
       end
+      @tags = []
+      if !hash["tags"].nil?
+        hash["tags"].each do |h|
+          @tags.push(Tag.new(h))
+        end
+      end
+      if !hash["life-span"].nil?
+        @life_span = LifeSpan.new(hash["life-span"])
+      end
     end
   end
 
@@ -114,17 +193,85 @@ module MusicBrainz2
 
     public
 
+    attr_accessor :s_artist, :s_barcode, :s_comment, :s_discid, :s_title
+    attr_accessor :s_tracks
+
+    attr_reader :id, :count, :title, :artist, :barcode, :disambiguation
+
     def self.search(data, linker = "AND")
       res = Request.get("cdstub", data, linker)
       @results = res["cdstubs"]
       return @results
     end
+
+    def search()
+      params = {}
+      params[:artist] = @s_artist if !@s_artist.nil?
+      params[:barcode] = @s_barcode if !@s_barcode.nil?
+      params[:comment] = @s_comment if !@s_comment.nil?
+      params[:s_discid] = @s_discid if !@s_discid.nil?
+      params[:title] = @s_title if !@s_title.nil?
+      params[:tracks] = @s_tracks if !@s_tracks.nil?
+      return Request.get("cdstub", params)["cdstubs"]
+    end
+
+    def parse(hash)
+      @id = hash["id"]
+      @count = hash["count"].to_i
+      @title = hash["title"]
+      @artist = hash["artist"]
+      @barcode = hash["barcode"]
+    end
   end
 
-  class Event
+  class Coordinates < Ressource
+    public
+
+    attr_reader :latitude, :longitude
+
+    def parse(hash)
+      @latitude = hash["latitude"].to_f
+      @longitude = hash["longitude"].to_f
+    end
+  end
+
+  class Event < Ressource
     include Request
 
     public
+
+    attr_accessor :s_alias, :s_aid, :s_area, :s_arid, :s_artist, :s_comment
+    attr_accessor :s_eid, :s_event, :s_pid, :s_place, :s_type, :s_tag
+    attr_reader :id, :type, :name, :life_span, :time, :relations
+
+    def search
+      fields = {}
+      fields[:alias] = @s_alias if !@s_alias.nil?
+      fields[:area] = @s_area if !@s_area.nil?
+      fields[:arid] = @s_arid if !@s_arid.nil?
+      fields[:artist] = @s_artist if !@s_artist.nil?
+      fields[:comment] = @s_comment if !@s_comment.nil?
+      fields[:eid] = @s_eid if !@s_eid.nil?
+      fields[:event] = @s_event if !@s_event.nil?
+      fields[:pid] = @s_pid if !@s_pid.nil?
+      fields[:place] = @s_place if !@s_place.nil?
+      fields[:type] = @s_type if !@s_type.nil?
+      fields[:tag] = @s_tag if !@s_tag.nil?
+      return Request.get("event", fields)["events"]
+    end
+
+    def parse(hash)
+      @id = hash["id"]
+      @type = hash["type"]
+      @name = hash["name"]
+      @life_span = hash["life-span"]
+      @relations = []
+      if !hash["relations"].nil?
+        hash["relations"].each do |h|
+          @relations.push(Relation.new(h))
+        end
+      end
+    end
 
     def self.search(data, linker = "AND")
       res = Request.get("event", data, linker)
@@ -133,10 +280,40 @@ module MusicBrainz2
     end
   end
 
-  class Instrument
+  class Instrument < Ressource
     include Request
 
     public
+
+    attr_accessor :s_alias, :s_comment, :s_description, :s_iid, :s_instrument
+    attr_accessor :s_type, :s_tag
+    attr_reader :id, :type, :type_id, :name, :description, :aliases
+
+    def search()
+      fields = {}
+      fields[:alias] = @s_alias if !@s_alias.nil?
+      fields[:comment] = @s_comment if !@s_comment.nil?
+      fields[:description] = @s_description if !@s_description.nil?
+      fields[:iid] = @s_iid if !@s_iid.nil?
+      fields[:instrument] = @s_instrument if !@s_instrument.nil?
+      fields[:type] = @s_type if !@s_type.nil?
+      fields[:tag] = @s_tag if !@s_tag.nil?
+      return Request.get("instrument", fields)["instruments"]
+    end
+
+    def parse(hash)
+      @id = hash["id"]
+      @type = hash["type"]
+      @type_id = hash["type_id"]
+      @name = hash["name"]
+      @description = hash["description"]
+      @aliases = []
+      if !hash["aliases"].nil?
+        hash["aliases"].each do |h|
+          @aliases.push(Alias.new(h))
+        end
+      end
+    end
 
     def self.search(data, linker = "AND")
       res = Request.get("instrument", data, linker)
@@ -145,10 +322,65 @@ module MusicBrainz2
     end
   end
 
+  class LifeSpan < Ressource
+    public
+
+    attr_reader :begin, :ended
+
+    def parse(hash)
+      @begin = hash["begin"]
+      @ended = hash["ended"]
+    end
+  end
+
   class Label
     include Request
 
     public
+
+    attr_accessor :s_alias, :s_area, :s_begin, :s_code, :s_comment, :s_country
+    attr_accessor :s_end, :s_ended, :s_ipi, :s_label, :s_labelaccent, :s_laid
+    attr_accessor :s_sortname, :s_type, :s_tag
+
+    attr_reader :id, :type, :type_id, :name, :sort_name, :country, :area
+    attr_reader :life_span, :aliases
+
+    def search()
+      fields = {}
+      fields[:alias] = @s_alias if !@s_alias.nil?
+      fields[:area] = @s_area if !@s_area.nil?
+      fields[:begin] = @s_begin if !@s_begin.nil?
+      fields[:code] = @s_code if !@s_code.nil?
+      fields[:comment] = @s_comment if !@s_comment.nil?
+      fields[:country] = @s_country if !@s_country.nil?
+      fields[:end] = @s_end if !@s_end.nil?
+      fields[:ended] = @s_ended if !@s_ended.nil?
+      fields[:ipi] = @s_ipi if !@s_ipi.nil?
+      fields[:label] = @s_label if !@s_label.nil?
+      fields[:labelaccent] = @s_labelaccent if !@s_labelaccent.nil?
+      fields[:laid] = @s_laid if !@s_laid.nil?
+      fields[:sortname] = @s_sortname if !@s_sortname.nil?
+      fields[:type] = @s_type if !@s_type.nil?
+      fields[:tag] = @s_tag if !@s_tag.nil?
+      return Request.get("label", fields)["labels"]
+    end
+
+    def parse(hash)
+      @id = hash["id"]
+      @type = hash["type"]
+      @type_id = hash["type_id"]
+      @name = hash["name"]
+      @sort_name = hash["sort_name"]
+      @country = hash["country"]
+      @area = Area.new(hash["area"])
+      @life_span = LifeSpan.new(hash["life_sapn"])
+      @aliases = []
+      if !hash["aliases"].nil?
+        hash["aliases"].each do |h|
+          @aliases.push(Alias.new(h))
+        end
+      end
+    end
 
     def self.search(data, linker = "AND")
       res = Request.get("label", data, linker)
@@ -180,6 +412,40 @@ module MusicBrainz2
     include Request
 
     public
+
+    attr_accessor :s_pid, :s_address, :s_alias, :s_area, :s_begin, :s_comment
+    attr_accessor :s_end, :s_ended, :s_lat, :s_long, :s_place, :s_placeaccent
+    attr_accessor :s_type
+
+    attr_reader :id, :type, :type_id, :name, :address, :coordinates, :area
+    attr_reader :life_span
+
+    def search()
+      fields = {}
+      fields[:pid] = @s_pid if !@s_pid.nil?
+      fields[:alias] = @s_address if !@s_address.nil?
+      fields[:area] = @s_area if !@s_area.nil?
+      fields[:begin] = @s_begin if !@s_begin.nil?
+      fields[:comment] = @s_comment if !@s_comment.nil?
+      fields[:end] = @s_end if !@s_end.nil?
+      fields[:ended] = @s_ended if !@s_ended.nil?
+      fields[:lat] = @s_lat if !@s_lat.nil?
+      fields[:long] = @s_long if !@s_long.nil?
+      fields[:place] = @s_place if !@s_place.nil?
+      fields[:placeaccent] = @s_placeaccent if !@s_placeaccent.nil?
+      fields[:type] = @s_type if !@s_type.nil?
+      return Request.get("place", fields)["places"]
+    end
+
+    def parse(hash)
+      @id = hash["id"]
+      @type = hash["type"]
+      @name = hash["name"]
+      @address = hash["address"]
+      @coordinates = Coordinates.new(hash["coordinates"])
+      @area = Area.new(hash["area"])
+      @life_span = LifeSpan.new(hash["life-span"])
+    end
 
     def self.search(data, linker = "AND")
       res = Request.get("place", data, linker)
@@ -268,6 +534,20 @@ module MusicBrainz2
     end
   end
 
+  class Relation < Ressource
+    public
+
+    attr_reader :type, :type_id, :direction, :artist, :release
+
+    def parse(hash)
+      @type = hash["type"]
+      @type_id = hash["type-id"]
+      @direction = hash["direction"]
+      @artist = Artist.new(hash["artist"]) if !hash["artist"].nil?
+      @release = Release.new(hash["release"]) if !hash["release"].nil?
+    end
+  end
+
   class Release < Ressource
     include Request
 
@@ -289,10 +569,14 @@ module MusicBrainz2
       @date = hash["date"]
       @country = hash["country"]
       @artist = []
-      hash["artist-credit"].each do |h|
-        @artist.push(Artist.new(h))
+      if !hash["artist-credit"].nil?
+        hash["artist-credit"].each do |h|
+          @artist.push(Artist.new(h))
+        end
       end
-      @release_group = ReleaseGroup.new(hash["release-group"])
+      if !hash["release-group"].nil?
+        @release_group = ReleaseGroup.new(hash["release-group"])
+      end
       @release_events = []
       if !hash["release-events"].nil?
         hash["release-events"].each do |h|
@@ -356,6 +640,32 @@ module MusicBrainz2
     include Request
 
     public
+
+    attr_accessor :s_relationtype, :s_targetid, :s_targettype, :s_uid, :s_url
+
+    attr_reader :id, :resource, :relations
+
+    def search()
+      fields = {}
+      fields[:relationtype] = @s_relationtype if !@relationtype.nil?
+      fields[:s_targetid] = @s_targetid if !@s_targetid.nil?
+      fields[:s_uid] = @s_uid if !@s_uid.nil?
+      fields[:s_url] = @s_url if !@s_url.nil?
+      return Request.get("url", fields)["urls"]
+    end
+
+    def parse(hash)
+      @id = hash["id"]
+      @resource = hash["resource"]
+      @relations = []
+      if !hash["relation-list"].nil?
+        hash["relation-list"].each do |ha|
+          ha["relations"].each do |h|
+            @relations.push(Relation.new(h))
+          end
+        end
+      end
+    end
 
     def self.search(data, linker = "AND")
       res = Request.get("url", data, linker)
