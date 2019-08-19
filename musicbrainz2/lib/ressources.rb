@@ -462,7 +462,14 @@ module MusicBrainz2
     def initialize
     end
 
-    attr_accessor :id, :artist, :artists, :title, :duration, :releases, :video
+    attr_accessor :s_arid, :s_artist, :s_artistname, :s_creditname, :s_comment
+    attr_accessor :s_country, :s_date, :s_dur, :s_format, :s_isrc, :s_number
+    attr_accessor :s_position, :s_primarytype, :s_qdur, :s_recording
+    attr_accessor :s_recordingaccent, :s_reid, :s_release, :s_rgid, :s_rid
+    attr_accessor :s_secondarytype, :s_status, :s_tid, :s_tnum, :s_tracks
+    attr_accessor :s_tracksrelease, :s_tag, :s_type, :s_video
+
+    attr_reader :id, :artist, :artists, :title, :duration, :releases, :video
 
     def self.search(data, linker = "AND")
       res = Request.get("recording", data, linker)
@@ -470,18 +477,37 @@ module MusicBrainz2
     end
 
     def search()
-      params = {}
-      if !@artist.to_s.empty?
-        params[:artist] = @artist
-      end
-      if !@title.to_s.empty?
-        params[:recording] = @title
-      end
-      if !@duration.to_s.empty?
-        params[:dur] = @duration
-      end
-      res = Request.get("recording", params)
-      return res["recordings"]
+      fields = {}
+      fields[:arid] = @s_arid if !@s_arid.nil?
+      fields[:artist] = @s_artist if !@s_artist.nil?
+      fields[:artistname] = @s_artistname if !@s_artistname.nil?
+      fields[:creditname] = @s_creditname if !@s_creditname.nil?
+      fields[:comment] = @s_comment if !@s_comment.nil?
+      fields[:country] = @s_country if !@s_country.nil?
+      fields[:date] = @s_date if !@s_date.nil?
+      fields[:dur] = @s_dur if !@s_dur.nil?
+      fields[:format] = @s_format if !@s_format.nil?
+      fields[:isrc] = @s_isrc if !@s_isrc.nil?
+      fields[:number] = @s_number if !@s_number.nil?
+      fields[:position] = @s_position if !@s_position.nil?
+      fields[:primarytype] = @s_primarytype if !@s_primarytype.nil?
+      fields[:qdur] = @s_qdur if !@s_qdur.nil?
+      fields[:recording] = @s_recording if !@s_recording.nil?
+      fields[:recordingsaccent] = @s_recordingaccent if !@s_recordingaccent.nil?
+      fields[:reid] = @s_reid if !@s_reid.nil?
+      fields[:release] = @s_release if !@s_release.nil?
+      fields[:rgid] = @s_rgid if !@rgid.nil?
+      fields[:rid] = @s_rid if !@s_rid.nil?
+      fields[:secondarytype] = @s_secondarytype if !@s_secondarytype.nil?
+      fields[:status] = @s_status if !@s_status.nil?
+      fields[:tid] = @s_tid if !@s_tid.nil?
+      fields[:tnum] = @s_tnum if !@s_tnum.nil?
+      fields[:tracks] = @s_tracks if !@s_tracks.nil?
+      fields[:tracksrelease] = @s_tracksrelease if !@s_tracksrelease.nil?
+      fields[:tag] = @s_tag if !@s_tag.nil?
+      fields[:type] = @s_type if !@s_type.nil?
+      fields[:video] = @s_type if !@s_video.nil?
+      return Request.get("recording", fields)["recordings"]
     end
 
     def parse(hash)
@@ -518,12 +544,27 @@ module MusicBrainz2
 
     public
 
-    attr_accessor :id, :type_id, :title, :primary_type
+    attr_accessor :s_arid, :s_artist, :s_artistname, :s_comment, :s_creditname
+    attr_accessor :s_primarytype, :s_rgid, :s_releasegroup
+    attr_accessor :s_releasegroupaccent, :s_releases, :s_release, :s_reid
+    attr_accessor :s_secondarytype, :s_status, :s_tag, :s_type
+    attr_reader :id, :type_id, :title, :primary_type, :artists, :releases
 
-    def self.search(data, linker = "AND")
-      res = Request.get("release-group", data, linker)
-      @results = res["release-groups"]
-      return @results
+    def search()
+      fields = {}
+      fields[:arid] = @s_arid if !@s_arid.nil?
+      fields[:artist] = @s_artist if !@s_artist.nil?
+      fields[:artistname] = @s_artistname if !@s_artistname.nil?
+      fields[:comment] = @s_comment if !@s_comment.nil?
+      fields[:creditname] = @s_creditname if !@s_creditname.nil?
+      fields[:primarytype] = @s_primarytype if !@s_primarytype.nil?
+      fields[:rgid] = @s_rgid if !@s_rgid.nil?
+      fields[:releasegroup] = @s_releasegroup if !@s_releasegroup.nil?
+      fields[:releasegroupaccent] =
+        @s_releasegroupaccent if !@s_releasegroupaccent.nil?
+      fields[:releases] = @s_releases if !@s_releases.nil?
+      fields[:release] = @s_release if !@s_release.nil?
+      return Request.get("releasegroup", fields)["releasegroups"]
     end
 
     def parse(hash)
@@ -531,6 +572,16 @@ module MusicBrainz2
       @type_id = hash["type-id"]
       @title = hash["title"]
       @primary_type = hash["primary-type"]
+      if !hash["artist-credit"].nil?
+      end
+      if !hash["releases"].nil?
+      end
+    end
+
+    def self.search(data, linker = "AND")
+      res = Request.get("release-group", data, linker)
+      @results = res["release-groups"]
+      return @results
     end
   end
 
