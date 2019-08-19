@@ -1,7 +1,21 @@
 require_relative "./request.rb"
 
 module MusicBrainz2
-  class Alias
+  class Ressource
+    public
+
+    def initialize(arg = nil)
+      if arg.is_a?(Hash)
+        self.parse(arg)
+      end
+    end
+
+    def parse(hash)
+      raise "You can not initialize this abstract class!"
+    end
+  end
+
+  class Alias < Ressource
     public
 
     attr_accessor :name, :locale, :type, :primary, :begin_date, :end_date
@@ -28,13 +42,12 @@ module MusicBrainz2
     end
   end
 
-  class Area
+  class Area < Ressource
     include Request
 
     public
 
-    attr_accessor :id, :name, :sort_name
-
+    attr_accessor :id, :name, :sort_name, :iso_codes
     def self.search(data, linker = "AND")
       res = Request.get("area", data, linker)
       @results = res["areas"]
@@ -45,18 +58,34 @@ module MusicBrainz2
       @id = hash["id"]
       @name = hash["name"]
       @sort_name = hash["sort-name"]
+      @iso_codes = []
+      if !hash["iso-3166-1-codes"].nil?
+        hash["iso-3166-1-codes"].each do |h|
+          @iso_codes.push(h)
+        end
+      end
     end
   end
 
-  class Artist
+  class Artist < Ressource
     include Request
 
     public
 
-    attr_accessor :id, :name, :sort_name, :aliases
+    attr_accessor :id, :name, :sort_name, :aliases, :tags, :area, :begin_area
 
     def self.search(data, linker = "AND")
       res = Request.get("artist", data, linker)
+      @results = res["artists"]
+      return @results
+    end
+
+    def search()
+      params = {}
+      if !@name.nil?
+        params[:name] = @name
+      end
+      res = Request.get("artist", params)
       @results = res["artists"]
       return @results
     end
@@ -65,15 +94,17 @@ module MusicBrainz2
       @id = hash["id"]
       @name = hash["name"]
       @sort_name = hash["sort-name"]
-      if hash["aliases"] != nil
+      if !hash["aliases"].nil?
         @aliases = []
         hash["aliases"].each do |h|
-          al = Alias.new
-          al.parse(h)
-          @aliases.push(al)
+          @aliases.push(Alias.new(h))
         end
-      else
-        @aliases = nil
+      end
+      if !hash["area"].nil?
+        @area = Area.new(hash["area"])
+      end
+      if !hash["begin-area"].nil?
+        @begin_area = Area.new(hash["begin-area"])
       end
     end
   end
@@ -126,16 +157,22 @@ module MusicBrainz2
     end
   end
 
-  class Media
+  class Media < Ressource
     public
 
-    attr_accessor :position, :format, :track_count, :track_offset
+    attr_accessor :position, :format, :track_count, :track_offset, :track
 
     def parse(hash)
       @position = hash["position"]
       @format = hash["format"]
       @track_count = hash["track-count"]
       @track_offset = hash["track-offset"]
+      @track = []
+      if !hash["track"].nil?
+        hash["track"].each do |h|
+          @track.push(Track.new(h))
+        end
+      end
     end
   end
 
@@ -159,7 +196,7 @@ module MusicBrainz2
     def initialize
     end
 
-    attr_accessor :id, :artist, :artists, :title, :duration, :releases
+    attr_accessor :id, :artist, :artists, :title, :duration, :releases, :video
 
     def self.search(data, linker = "AND")
       res = Request.get("recording", data, linker)
@@ -184,35 +221,33 @@ module MusicBrainz2
     def parse(hash)
       @id = hash["id"]
       @title = hash["title"]
+      @video = hash["video"]
       @artists = []
       hash["artist-credit"].each do |h|
-        a = Artist.new
-        a.parse(h["artist"])
-        @artists.push(a)
+        @artists.push(Artist.new(h))
       end
       @duration = hash["length"]
       @releases = []
-      hash["releases"].each do |h|
-        r = Release.new
-        r.parse(h)
-        @releases.push(r)
+      if !hash["releases"].nil?
+        hash["releases"].each do |h|
+          @releases.push(Release.new(h))
+        end
       end
     end
   end
 
-  class ReleaseEvent
+  class ReleaseEvent < Ressource
     public
 
     attr_accessor :date, :area
 
     def parse(hash)
       @date = hash["date"]
-      @area = Area.new
-      @area.parse(hash["area"])
+      @area = Area.new(hash["area"])
     end
   end
 
-  class ReleaseGroup
+  class ReleaseGroup < Ressource
     include Request
 
     public
@@ -233,7 +268,7 @@ module MusicBrainz2
     end
   end
 
-  class Release
+  class Release < Ressource
     include Request
 
     public
@@ -255,16 +290,20 @@ module MusicBrainz2
       @country = hash["country"]
       @artist = []
       hash["artist-credit"].each do |h|
-        a = Artist.new
-        a.parse(h)
-        @artist.push(a)
+        @artist.push(Artist.new(h))
       end
-      rg = ReleaseGroup.new
-      rg.parse(hash["release-group"])
-      @release_group = rg
+      @release_group = ReleaseGroup.new(hash["release-group"])
       @release_events = []
-      hash["release-events"].each do |h|
-        @release_events.push(h)
+      if !hash["release-events"].nil?
+        hash["release-events"].each do |h|
+          @release_events.push(ReleaseEvent.new(h))
+        end
+      end
+      @media = []
+      if !hash["media"].nil?
+        hash["media"].each do |h|
+          @media.push(Media.new(h))
+        end
       end
     end
   end
@@ -281,19 +320,26 @@ module MusicBrainz2
     end
   end
 
-  class Tag
+  class Tag < Ressource
     include Request
 
     public
+
+    attr_reader :count, :name
 
     def self.search(data, linker = "AND")
       res = Request.get("tag", data, linker)
       @results = res["tags"]
       return @results
     end
+
+    def parse(hash)
+      @count = hash["count"]
+      @name = hash["name"]
+    end
   end
 
-  class Track
+  class Track < Ressource
     public
 
     attr_accessor :id, :number, :title, :length
