@@ -30,11 +30,11 @@ module MusicBrainz2
 
     protected
 
-    def self.get(source, search, linker = "AND", limit = 25)
+    def self.get(source, search, linker = "AND", limit = 25, offset = 0)
       uri = URI("https://musicbrainz.org/ws/2/#{source}")
       if search.is_a?(Hash)
         params = { :query => Request.parse_params(search, linker),
-                   :fmt => "json", :limit => limit }
+                   :fmt => "json", :limit => limit, :offset => offset }
       else
         params = { :query => search, :fmt => "json" }
       end
