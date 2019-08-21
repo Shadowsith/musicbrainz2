@@ -1,6 +1,8 @@
 require_relative "./request.rb"
 
 module MusicBrainz2
+  public
+
   class Ressource
     protected
 
@@ -83,20 +85,19 @@ module MusicBrainz2
     end
 
     def search()
-      params = {}
-      params[:aid] = @s_aid if !@s_aid.nil?
-      params[:area] = @s_area if !@s_area.nil?
-      params[:begin] = @s_begin if !@s_begin.nil?
-      params[:comment] = @s_comment if !@s_comment.nil?
-      params[:end] = @s_end if !@s_end.nil?
-      params[:ended] = @s_ended if !@s_ended.nil?
-      params[:iso] = @s_iso if !@s_iso.nil?
-      params[:iso1] = @s_iso1 if !@s_iso1.nil?
-      params[:iso2] = @s_iso2 if !@s_iso2.nil?
-      params[:iso3] = @s_iso3 if !@s_iso3.nil?
-      params[:sortname] = @s_sortname if !@s_sortname.nil?
-      params[:type] = @s_type if !@s_type.nil?
-      return Request.get("area", params)["areas"]
+      @fields[:aid] = @s_aid if !@s_aid.nil?
+      @fields[:area] = @s_area if !@s_area.nil?
+      @fields[:begin] = @s_begin if !@s_begin.nil?
+      @fields[:comment] = @s_comment if !@s_comment.nil?
+      @fields[:end] = @s_end if !@s_end.nil?
+      @fields[:ended] = @s_ended if !@s_ended.nil?
+      @fields[:iso] = @s_iso if !@s_iso.nil?
+      @fields[:iso1] = @s_iso1 if !@s_iso1.nil?
+      @fields[:iso2] = @s_iso2 if !@s_iso2.nil?
+      @fields[:iso3] = @s_iso3 if !@s_iso3.nil?
+      @fields[:sortname] = @s_sortname if !@s_sortname.nil?
+      @fields[:type] = @s_type if !@s_type.nil?
+      return Request.get("area", @fields)["areas"]
     end
 
     def parse(hash)
@@ -141,25 +142,24 @@ module MusicBrainz2
     end
 
     def search()
-      params = {}
-      params[:alias] = @s_alias if !@s_alias.nil?
-      params[:area] = @s_area if !@s_area.nil?
-      params[:arid] = @s_arid if !@s_arid.nil?
-      params[:artist] = @s_artist if !@s_artist.nil?
-      params[:artistaccent] = @s_artistaccent if !@s_artistaccent.nil?
-      params[:begin] = @s_begin if !@s_begin.nil?
-      params[:beginarea] = @s_beginarea if !@s_beginarea.nil?
-      params[:comment] = @s_comment if !@s_comment.nil?
-      params[:country] = @s_country if !@s_country.nil?
-      params[:end] = @s_end if !@s_end.nil?
-      params[:endarea] = @s_endarea if !@s_endarea.nil?
-      params[:ended] = @s_ended if !@s_ended.nil?
-      params[:gender] = @s_gender if !@s_gender.nil?
-      params[:ipi] = @s_ipi if !@s_ipi.nil?
-      params[:sortname] if !@s_sortname.nil?
-      params[:tag] = @s_tag if !@s_tag.nil?
-      params[:type] = @s_type if !@s_type.nil?
-      return Request.get("artist", params)["artists"]
+      @fields[:alias] = @s_alias if !@s_alias.nil?
+      @fields[:area] = @s_area if !@s_area.nil?
+      @fields[:arid] = @s_arid if !@s_arid.nil?
+      @fields[:artist] = @s_artist if !@s_artist.nil?
+      @fields[:artistaccent] = @s_artistaccent if !@s_artistaccent.nil?
+      @fields[:begin] = @s_begin if !@s_begin.nil?
+      @fields[:beginarea] = @s_beginarea if !@s_beginarea.nil?
+      @fields[:comment] = @s_comment if !@s_comment.nil?
+      @fields[:country] = @s_country if !@s_country.nil?
+      @fields[:end] = @s_end if !@s_end.nil?
+      @fields[:endarea] = @s_endarea if !@s_endarea.nil?
+      @fields[:ended] = @s_ended if !@s_ended.nil?
+      @fields[:gender] = @s_gender if !@s_gender.nil?
+      @fields[:ipi] = @s_ipi if !@s_ipi.nil?
+      @fields[:sortname] if !@s_sortname.nil?
+      @fields[:tag] = @s_tag if !@s_tag.nil?
+      @fields[:type] = @s_type if !@s_type.nil?
+      return Request.get("artist", @fields)["artists"]
     end
 
     def parse(hash)
@@ -209,14 +209,14 @@ module MusicBrainz2
     end
 
     def search()
-      params = {}
-      params[:artist] = @s_artist if !@s_artist.nil?
-      params[:barcode] = @s_barcode if !@s_barcode.nil?
-      params[:comment] = @s_comment if !@s_comment.nil?
-      params[:s_discid] = @s_discid if !@s_discid.nil?
-      params[:title] = @s_title if !@s_title.nil?
-      params[:tracks] = @s_tracks if !@s_tracks.nil?
-      return Request.get("cdstub", params)["cdstubs"]
+      @fields = {}
+      @fields[:artist] = @s_artist if !@s_artist.nil?
+      @fields[:barcode] = @s_barcode if !@s_barcode.nil?
+      @fields[:comment] = @s_comment if !@s_comment.nil?
+      @fields[:s_discid] = @s_discid if !@s_discid.nil?
+      @fields[:title] = @s_title if !@s_title.nil?
+      @fields[:tracks] = @s_tracks if !@s_tracks.nil?
+      return Request.get("cdstub", @fields)["cdstubs"]
     end
 
     def parse(hash)
@@ -249,19 +249,18 @@ module MusicBrainz2
     attr_reader :id, :type, :name, :life_span, :time, :relations
 
     def search
-      fields = {}
-      fields[:alias] = @s_alias if !@s_alias.nil?
-      fields[:area] = @s_area if !@s_area.nil?
-      fields[:arid] = @s_arid if !@s_arid.nil?
-      fields[:artist] = @s_artist if !@s_artist.nil?
-      fields[:comment] = @s_comment if !@s_comment.nil?
-      fields[:eid] = @s_eid if !@s_eid.nil?
-      fields[:event] = @s_event if !@s_event.nil?
-      fields[:pid] = @s_pid if !@s_pid.nil?
-      fields[:place] = @s_place if !@s_place.nil?
-      fields[:type] = @s_type if !@s_type.nil?
-      fields[:tag] = @s_tag if !@s_tag.nil?
-      return Request.get("event", fields)["events"]
+      @fields[:alias] = @s_alias if !@s_alias.nil?
+      @fields[:area] = @s_area if !@s_area.nil?
+      @fields[:arid] = @s_arid if !@s_arid.nil?
+      @fields[:artist] = @s_artist if !@s_artist.nil?
+      @fields[:comment] = @s_comment if !@s_comment.nil?
+      @fields[:eid] = @s_eid if !@s_eid.nil?
+      @fields[:event] = @s_event if !@s_event.nil?
+      @fields[:pid] = @s_pid if !@s_pid.nil?
+      @fields[:place] = @s_place if !@s_place.nil?
+      @fields[:type] = @s_type if !@s_type.nil?
+      @fields[:tag] = @s_tag if !@s_tag.nil?
+      return Request.get("event", @fields)["events"]
     end
 
     def parse(hash)
@@ -294,15 +293,14 @@ module MusicBrainz2
     attr_reader :id, :type, :type_id, :name, :description, :aliases
 
     def search()
-      fields = {}
-      fields[:alias] = @s_alias if !@s_alias.nil?
-      fields[:comment] = @s_comment if !@s_comment.nil?
-      fields[:description] = @s_description if !@s_description.nil?
-      fields[:iid] = @s_iid if !@s_iid.nil?
-      fields[:instrument] = @s_instrument if !@s_instrument.nil?
-      fields[:type] = @s_type if !@s_type.nil?
-      fields[:tag] = @s_tag if !@s_tag.nil?
-      return Request.get("instrument", fields)["instruments"]
+      @fields[:alias] = @s_alias if !@s_alias.nil?
+      @fields[:comment] = @s_comment if !@s_comment.nil?
+      @fields[:description] = @s_description if !@s_description.nil?
+      @fields[:iid] = @s_iid if !@s_iid.nil?
+      @fields[:instrument] = @s_instrument if !@s_instrument.nil?
+      @fields[:type] = @s_type if !@s_type.nil?
+      @fields[:tag] = @s_tag if !@s_tag.nil?
+      return Request.get("instrument", @fields)["instruments"]
     end
 
     def parse(hash)
@@ -350,23 +348,22 @@ module MusicBrainz2
     attr_reader :life_span, :aliases
 
     def search()
-      fields = {}
-      fields[:alias] = @s_alias if !@s_alias.nil?
-      fields[:area] = @s_area if !@s_area.nil?
-      fields[:begin] = @s_begin if !@s_begin.nil?
-      fields[:code] = @s_code if !@s_code.nil?
-      fields[:comment] = @s_comment if !@s_comment.nil?
-      fields[:country] = @s_country if !@s_country.nil?
-      fields[:end] = @s_end if !@s_end.nil?
-      fields[:ended] = @s_ended if !@s_ended.nil?
-      fields[:ipi] = @s_ipi if !@s_ipi.nil?
-      fields[:label] = @s_label if !@s_label.nil?
-      fields[:labelaccent] = @s_labelaccent if !@s_labelaccent.nil?
-      fields[:laid] = @s_laid if !@s_laid.nil?
-      fields[:sortname] = @s_sortname if !@s_sortname.nil?
-      fields[:type] = @s_type if !@s_type.nil?
-      fields[:tag] = @s_tag if !@s_tag.nil?
-      return Request.get("label", fields)["labels"]
+      @fields[:alias] = @s_alias if !@s_alias.nil?
+      @fields[:area] = @s_area if !@s_area.nil?
+      @fields[:begin] = @s_begin if !@s_begin.nil?
+      @fields[:code] = @s_code if !@s_code.nil?
+      @fields[:comment] = @s_comment if !@s_comment.nil?
+      @fields[:country] = @s_country if !@s_country.nil?
+      @fields[:end] = @s_end if !@s_end.nil?
+      @fields[:ended] = @s_ended if !@s_ended.nil?
+      @fields[:ipi] = @s_ipi if !@s_ipi.nil?
+      @fields[:label] = @s_label if !@s_label.nil?
+      @fields[:labelaccent] = @s_labelaccent if !@s_labelaccent.nil?
+      @fields[:laid] = @s_laid if !@s_laid.nil?
+      @fields[:sortname] = @s_sortname if !@s_sortname.nil?
+      @fields[:type] = @s_type if !@s_type.nil?
+      @fields[:tag] = @s_tag if !@s_tag.nil?
+      return Request.get("label", @fields)["labels"]
     end
 
     def parse(hash)
@@ -425,20 +422,19 @@ module MusicBrainz2
     attr_reader :life_span
 
     def search()
-      fields = {}
-      fields[:pid] = @s_pid if !@s_pid.nil?
-      fields[:alias] = @s_address if !@s_address.nil?
-      fields[:area] = @s_area if !@s_area.nil?
-      fields[:begin] = @s_begin if !@s_begin.nil?
-      fields[:comment] = @s_comment if !@s_comment.nil?
-      fields[:end] = @s_end if !@s_end.nil?
-      fields[:ended] = @s_ended if !@s_ended.nil?
-      fields[:lat] = @s_lat if !@s_lat.nil?
-      fields[:long] = @s_long if !@s_long.nil?
-      fields[:place] = @s_place if !@s_place.nil?
-      fields[:placeaccent] = @s_placeaccent if !@s_placeaccent.nil?
-      fields[:type] = @s_type if !@s_type.nil?
-      return Request.get("place", fields)["places"]
+      @fields[:pid] = @s_pid if !@s_pid.nil?
+      @fields[:alias] = @s_address if !@s_address.nil?
+      @fields[:area] = @s_area if !@s_area.nil?
+      @fields[:begin] = @s_begin if !@s_begin.nil?
+      @fields[:comment] = @s_comment if !@s_comment.nil?
+      @fields[:end] = @s_end if !@s_end.nil?
+      @fields[:ended] = @s_ended if !@s_ended.nil?
+      @fields[:lat] = @s_lat if !@s_lat.nil?
+      @fields[:long] = @s_long if !@s_long.nil?
+      @fields[:place] = @s_place if !@s_place.nil?
+      @fields[:placeaccent] = @s_placeaccent if !@s_placeaccent.nil?
+      @fields[:type] = @s_type if !@s_type.nil?
+      return Request.get("place", @fields)["places"]
     end
 
     def parse(hash)
@@ -481,37 +477,36 @@ module MusicBrainz2
     end
 
     def search()
-      fields = {}
-      fields[:arid] = @s_arid if !@s_arid.nil?
-      fields[:artist] = @s_artist if !@s_artist.nil?
-      fields[:artistname] = @s_artistname if !@s_artistname.nil?
-      fields[:creditname] = @s_creditname if !@s_creditname.nil?
-      fields[:comment] = @s_comment if !@s_comment.nil?
-      fields[:country] = @s_country if !@s_country.nil?
-      fields[:date] = @s_date if !@s_date.nil?
-      fields[:dur] = @s_dur if !@s_dur.nil?
-      fields[:format] = @s_format if !@s_format.nil?
-      fields[:isrc] = @s_isrc if !@s_isrc.nil?
-      fields[:number] = @s_number if !@s_number.nil?
-      fields[:position] = @s_position if !@s_position.nil?
-      fields[:primarytype] = @s_primarytype if !@s_primarytype.nil?
-      fields[:qdur] = @s_qdur if !@s_qdur.nil?
-      fields[:recording] = @s_recording if !@s_recording.nil?
-      fields[:recordingsaccent] = @s_recordingaccent if !@s_recordingaccent.nil?
-      fields[:reid] = @s_reid if !@s_reid.nil?
-      fields[:release] = @s_release if !@s_release.nil?
-      fields[:rgid] = @s_rgid if !@rgid.nil?
-      fields[:rid] = @s_rid if !@s_rid.nil?
-      fields[:secondarytype] = @s_secondarytype if !@s_secondarytype.nil?
-      fields[:status] = @s_status if !@s_status.nil?
-      fields[:tid] = @s_tid if !@s_tid.nil?
-      fields[:tnum] = @s_tnum if !@s_tnum.nil?
-      fields[:tracks] = @s_tracks if !@s_tracks.nil?
-      fields[:tracksrelease] = @s_tracksrelease if !@s_tracksrelease.nil?
-      fields[:tag] = @s_tag if !@s_tag.nil?
-      fields[:type] = @s_type if !@s_type.nil?
-      fields[:video] = @s_type if !@s_video.nil?
-      return Request.get("recording", fields)["recordings"]
+      @fields[:arid] = @s_arid if !@s_arid.nil?
+      @fields[:artist] = @s_artist if !@s_artist.nil?
+      @fields[:artistname] = @s_artistname if !@s_artistname.nil?
+      @fields[:creditname] = @s_creditname if !@s_creditname.nil?
+      @fields[:comment] = @s_comment if !@s_comment.nil?
+      @fields[:country] = @s_country if !@s_country.nil?
+      @fields[:date] = @s_date if !@s_date.nil?
+      @fields[:dur] = @s_dur if !@s_dur.nil?
+      @fields[:format] = @s_format if !@s_format.nil?
+      @fields[:isrc] = @s_isrc if !@s_isrc.nil?
+      @fields[:number] = @s_number if !@s_number.nil?
+      @fields[:position] = @s_position if !@s_position.nil?
+      @fields[:primarytype] = @s_primarytype if !@s_primarytype.nil?
+      @fields[:qdur] = @s_qdur if !@s_qdur.nil?
+      @fields[:recording] = @s_recording if !@s_recording.nil?
+      @fields[:recordingsaccent] = @s_recordingaccent if !@s_recordingaccent.nil?
+      @fields[:reid] = @s_reid if !@s_reid.nil?
+      @fields[:release] = @s_release if !@s_release.nil?
+      @fields[:rgid] = @s_rgid if !@rgid.nil?
+      @fields[:rid] = @s_rid if !@s_rid.nil?
+      @fields[:secondarytype] = @s_secondarytype if !@s_secondarytype.nil?
+      @fields[:status] = @s_status if !@s_status.nil?
+      @fields[:tid] = @s_tid if !@s_tid.nil?
+      @fields[:tnum] = @s_tnum if !@s_tnum.nil?
+      @fields[:tracks] = @s_tracks if !@s_tracks.nil?
+      @fields[:tracksrelease] = @s_tracksrelease if !@s_tracksrelease.nil?
+      @fields[:tag] = @s_tag if !@s_tag.nil?
+      @fields[:type] = @s_type if !@s_type.nil?
+      @fields[:video] = @s_type if !@s_video.nil?
+      return Request.get("recording", @fields)["recordings"]
     end
 
     def parse(hash)
@@ -555,20 +550,19 @@ module MusicBrainz2
     attr_reader :id, :type_id, :title, :primary_type, :artists, :releases
 
     def search()
-      fields = {}
-      fields[:arid] = @s_arid if !@s_arid.nil?
-      fields[:artist] = @s_artist if !@s_artist.nil?
-      fields[:artistname] = @s_artistname if !@s_artistname.nil?
-      fields[:comment] = @s_comment if !@s_comment.nil?
-      fields[:creditname] = @s_creditname if !@s_creditname.nil?
-      fields[:primarytype] = @s_primarytype if !@s_primarytype.nil?
-      fields[:rgid] = @s_rgid if !@s_rgid.nil?
-      fields[:releasegroup] = @s_releasegroup if !@s_releasegroup.nil?
-      fields[:releasegroupaccent] =
+      @fields[:arid] = @s_arid if !@s_arid.nil?
+      @fields[:artist] = @s_artist if !@s_artist.nil?
+      @fields[:artistname] = @s_artistname if !@s_artistname.nil?
+      @fields[:comment] = @s_comment if !@s_comment.nil?
+      @fields[:creditname] = @s_creditname if !@s_creditname.nil?
+      @fields[:primarytype] = @s_primarytype if !@s_primarytype.nil?
+      @fields[:rgid] = @s_rgid if !@s_rgid.nil?
+      @fields[:releasegroup] = @s_releasegroup if !@s_releasegroup.nil?
+      @fields[:releasegroupaccent] =
         @s_releasegroupaccent if !@s_releasegroupaccent.nil?
-      fields[:releases] = @s_releases if !@s_releases.nil?
-      fields[:release] = @s_release if !@s_release.nil?
-      return Request.get("release-group", fields)["release-groups"]
+      @fields[:releases] = @s_releases if !@s_releases.nil?
+      @fields[:release] = @s_release if !@s_release.nil?
+      return Request.get("release-group", @fields)["release-groups"]
     end
 
     def parse(hash)
@@ -802,12 +796,11 @@ module MusicBrainz2
     attr_reader :id, :resource, :relations
 
     def search()
-      fields = {}
-      fields[:relationtype] = @s_relationtype if !@relationtype.nil?
-      fields[:s_targetid] = @s_targetid if !@s_targetid.nil?
-      fields[:s_uid] = @s_uid if !@s_uid.nil?
-      fields[:s_url] = @s_url if !@s_url.nil?
-      return Request.get("url", fields)["urls"]
+      @fields[:relationtype] = @s_relationtype if !@relationtype.nil?
+      @fields[:s_targetid] = @s_targetid if !@s_targetid.nil?
+      @fields[:s_uid] = @s_uid if !@s_uid.nil?
+      @fields[:s_url] = @s_url if !@s_url.nil?
+      return Request.get("url", @fields)["urls"]
     end
 
     def parse(hash)
