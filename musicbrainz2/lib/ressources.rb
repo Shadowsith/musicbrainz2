@@ -2,17 +2,32 @@ require_relative "./request.rb"
 require_relative "./result.rb"
 
 module MusicBrainz2
-  public
-
   class Ressource
     protected
 
-    attr_accessor :fields
+    module Browse
+      AREA = "area"
+      ARTIST = "artist"
+      COLLECTION = "collection"
+      EDITOR = "editor"
+      LABEL = "label"
+      PLACE = "place"
+      RECORDING = "recording"
+      RELEASE = "release"
+      RELEASEGROUP = "release-group"
+      TRACK = "track"
+      TRACKARTIST = "track_artist"
+      WORK = "work"
+    end
+
+    attr_accessor :fields, :res_name
 
     public
 
     def initialize(arg = nil)
       @fields = {}
+      @res_name = self.class.to_s.downcase
+      @res_name = @res_name[@res_name.rindex(":") + 1, @res_name.length - 1]
       if arg.is_a?(Hash)
         self.parse(arg)
       end
@@ -22,10 +37,17 @@ module MusicBrainz2
       raise "You can not initialize this abstract class!"
     end
 
+    def get_by_id(id, sub_query = nil)
+      return Request.lookup(@res_name, id, sub_query)
+    end
+
+    def query(query, limit = 25, offset = 0, linker = "AND")
+      return Result.new(Request.get(@res_name, query, linker, limit, offset),
+                        @res_name + "s", self.class)
+    end
+
     def self.search(data, limit = 25, offset = 0, linker = "AND")
-      name = self.to_s.downcase
-      name = name[name.rindex(":") + 1, name.length - 1]
-      return Request.get(name, data, linker, limit, offset)
+      return Request.get(@res_name, data, linker, limit, offset)
     end
   end
 
@@ -80,6 +102,9 @@ module MusicBrainz2
     attr_reader :id, :name, :sort_name, :iso_codes
     attr_reader :life_span, :aliases
 
+    def find_by_collection(col_id)
+    end
+
     def search()
       @fields[:aid] = @s_aid if !@s_aid.nil?
       @fields[:area] = @s_area if !@s_area.nil?
@@ -129,7 +154,28 @@ module MusicBrainz2
     attr_accessor :s_country
 
     attr_reader :id, :name, :sort_name, :aliases, :tags, :area, :begin_area
-    attr_reader :type, :type_id, :life_span
+    attr_reader :type, :type_id, :life_span, :recordings, :releases
+    attr_reader :release_groups, :works
+
+    def find_by_area(arid, sub_query = nil)
+      return Result.new(Request.browse(@res_name, Browse::AREA, arid),
+                        "artists", Artist)
+    end
+
+    def find_by_collection(col_id)
+    end
+
+    def find_by_recording(rid)
+    end
+
+    def find_by_release(reid)
+    end
+
+    def find_by_release_group(rgid)
+    end
+
+    def find_by_work(wid)
+    end
 
     def search()
       @fields[:alias] = @s_alias if !@s_alias.nil?
@@ -158,8 +204,8 @@ module MusicBrainz2
       @sort_name = hash["sort-name"]
       @type = hash["type"]
       @type_id = hash["type-id"]
+      @aliases = []
       if !hash["aliases"].nil?
-        @aliases = []
         hash["aliases"].each do |h|
           @aliases.push(Alias.new(h))
         end
@@ -178,6 +224,30 @@ module MusicBrainz2
       end
       if !hash["life-span"].nil?
         @life_span = LifeSpan.new(hash["life-span"])
+      end
+      @recordings = []
+      if !hash["recordings"].nil?
+        hash["recordings"].each do |h|
+          @recordings.push(Recording.new(h))
+        end
+      end
+      @releases = []
+      if !hash["releases"].nil?
+        hash["releases"].each do |h|
+          @releases.push(Release.new(h))
+        end
+      end
+      @release_groups = []
+      if !hash["release-groups"].nil?
+        hash["release-groups"].each do |h|
+          @release_groups.push(ReleaseGroup.new(h))
+        end
+      end
+      @works = []
+      if !hash["works"].nil?
+        hash["works"].each do |h|
+          @works.push(Work.new(h))
+        end
       end
     end
   end
@@ -467,8 +537,10 @@ module MusicBrainz2
       @title = hash["title"]
       @video = hash["video"]
       @artists = []
-      hash["artist-credit"].each do |h|
-        @artists.push(Artist.new(h))
+      if !hash["artist-credit"].nil?
+        hash["artist-credit"].each do |h|
+          @artists.push(Artist.new(h))
+        end
       end
       @duration = hash["length"]
       @releases = []
@@ -654,7 +726,7 @@ module MusicBrainz2
       @fields[:sid] = @s_sid if !@s_sid.nil?
       @fields[:type] = @s_type if !@s_type.nil?
       @fields[:tag] = @s_tag if !@s_tags.nil?
-      return Request.get("series", @fields)["series"]
+      return Result.new(Request.get("series", @fields), "series", Series)
     end
 
     def parse(hash)
@@ -767,7 +839,7 @@ module MusicBrainz2
       @fields[:wid] = @s_wid if !@s_wid.nil?
       @fields[:work] = @s_work if !@s_work.nil?
       @fields[:workaccent] = @s_workaccent if !@s_workaccent.nil?
-      return Request.get("work", @fields)["works"]
+      return Result.new(Request.get("work", @fields), "works", Work)
     end
 
     def parse(hash)

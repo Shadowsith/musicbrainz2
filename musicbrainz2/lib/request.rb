@@ -42,7 +42,22 @@ module MusicBrainz2
       return self.request(uri)
     end
 
-    def self.find(id)
+    def self.lookup(source, id, sub_query = nil)
+      uri = URI("https://musicbrainz.org/ws/2/#{source}/#{id}")
+      params = {}
+      params[:fmt] = "json"
+      if !sub_query.nil?
+        params[:inc] = sub_query
+      end
+      uri.query = URI.encode_www_form(params)
+      return self.request(uri)
+    end
+
+    def self.browse(source, search, id, limit = 25, offset = 0)
+      uri = URI("https://musicbrainz.org/ws/2/#{source}")
+      params = { search => id, :fmt => "json" }
+      uri.query = URI.encode_www_form(params)
+      return self.request(uri)
     end
   end
 end
