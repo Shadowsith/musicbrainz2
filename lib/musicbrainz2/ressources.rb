@@ -1,6 +1,3 @@
-require_relative "./request.rb"
-require_relative "./result.rb"
-
 module MusicBrainz2
   class Ressource
     protected
