@@ -5,6 +5,11 @@ module MusicBrainz2
   class Ressource
     protected
 
+    def self.getClassName
+      name = self.to_s.downcase
+      name = name[name.rindex(":") + 1, name.length - 1]
+    end
+
     module Browse
       AREA = "area"
       ARTIST = "artist"
@@ -26,8 +31,7 @@ module MusicBrainz2
 
     def initialize(arg = nil)
       @fields = {}
-      @res_name = self.class.to_s.downcase
-      @res_name = @res_name[@res_name.rindex(":") + 1, @res_name.length - 1]
+      @res_name = Ressource.getClassName
       if arg.is_a?(Hash)
         self.parse(arg)
       end
@@ -37,17 +41,21 @@ module MusicBrainz2
       raise "You can not initialize this abstract class!"
     end
 
-    def get_by_id(id, sub_query = nil)
-      return Request.lookup(@res_name, id, sub_query)
+    def self.from_id(id, sub_query = nil)
+      return self.new(Request.lookup(getClassName, id, sub_query))
     end
 
-    def query(query, limit = 25, offset = 0, linker = "AND")
-      return Result.new(Request.get(@res_name, query, linker, limit, offset),
-                        @res_name + "s", self.class)
+    def self.query(query, limit = 25, offset = 0, linker = "AND")
+      return Result.new(Request.get(getClassName, query, linker, limit, offset),
+                        getClassName + "s", self)
     end
 
-    def self.search(data, limit = 25, offset = 0, linker = "AND")
-      return Request.get(@res_name, data, linker, limit, offset)
+    def self.get_hash(data, limit = 25, offset = 0, linker = "AND")
+      return Request.get(getClassName, data, linker, limit, offset)
+    end
+
+    def self.get_json(data, limit = 25, offset = 0, linker = "AND")
+      return Request.get_raw(getClassName, data, linker, limit, offset)
     end
   end
 
@@ -157,8 +165,8 @@ module MusicBrainz2
     attr_reader :type, :type_id, :life_span, :recordings, :releases
     attr_reader :release_groups, :works
 
-    def find_by_area(arid, sub_query = nil)
-      return Result.new(Request.browse(@res_name, Browse::AREA, arid),
+    def self.find_by_area(arid, sub_query = nil)
+      return Result.new(Request.browse(getClassName, Browse::AREA, arid),
                         "artists", Artist)
     end
 

@@ -14,7 +14,7 @@ module MusicBrainz2
       @results = hash[res_name] if @res_name.nil?
 
       # generic parsing results
-      if type < Ressource
+      if !@results.nil? && type < Ressource
         parse(type)
       end
     end

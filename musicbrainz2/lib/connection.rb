@@ -2,24 +2,24 @@ module MusicBrainz2
   class Connection
     private
 
-    @@agent = ""
+    @@app = ""
     @@version = ""
     @@contact = ""
 
     public
 
     def initialize(agent_name = "", agent_version = "", agent_contact = "")
-      @@agent = agent_name
+      @@app = agent_name
       @@version = agent_version
       @@contact = agent_contact
     end
 
-    def self.agent=(val)
-      @@agent = val
+    def self.app=(val)
+      @@app = val
     end
 
-    def self.agent
-      return @@agent
+    def self.app
+      return @@app
     end
 
     def self.version=(val)
