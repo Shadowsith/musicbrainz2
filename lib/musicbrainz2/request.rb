@@ -60,14 +60,14 @@ module MusicBrainz2
         params[:inc] = sub_query
       end
       uri.query = URI.encode_www_form(params)
-      return self.request(uri)
+      return JSON.parse(self.request(uri))
     end
 
     def self.browse(source, search, id, limit = 25, offset = 0)
       uri = URI("https://musicbrainz.org/ws/2/#{source}")
       params = { search => id, :fmt => "json" }
       uri.query = URI.encode_www_form(params)
-      return self.request(uri)
+      return JSON.parse(self.request(uri))
     end
   end
 end

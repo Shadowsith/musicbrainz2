@@ -1,5 +1,16 @@
 module MusicBrainz2
   class Result
+    private
+
+    def getInformation
+      if @count.nil?
+        @count = hash["artist-count"]
+      end
+      if @offset.nil?
+        @offset = hash["artist-offset"]
+      end
+    end
+
     protected
 
     attr_writer :results, :count, :created
@@ -11,7 +22,8 @@ module MusicBrainz2
     def initialize(hash, res_name, type = nil)
       @count = hash["count"]
       @created = hash["created"]
-      @results = hash[res_name] if @res_name.nil?
+      @offset = hash["offset"]
+      @results = hash[res_name] if !res_name.nil?
 
       # generic parsing results
       if !@results.nil? && type < Ressource
